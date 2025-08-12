@@ -9,8 +9,10 @@ from io import BytesIO
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException, TimeoutException
 
 def sanitize_filename(name):
     name = re.sub(r"[\\/:*?\"<>|]", "", name)
@@ -412,7 +414,7 @@ def setup_driver():
     return webdriver.Chrome(options=options)
 
 def main():
-    default_dir = "/home/nonaka/Documentos/Mangas/"
+    default_dir = "/home/val/Documentos/Mangas"
     user_input = input(f"Digite o caminho de saída (pressione Enter para usar o padrão: {default_dir}): ").strip()
     output_dir = user_input if user_input else default_dir
     os.makedirs(output_dir, exist_ok=True)
