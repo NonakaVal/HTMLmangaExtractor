@@ -192,193 +192,6 @@ class MangaImageDownloader:
         return True
 
 
-def generate_html_reader(self):
-    # Pegar todas as imagens da pasta pages, em ordem
-    page_files = sorted(
-        [f for f in os.listdir(self.pages_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))],
-        key=lambda x: int(''.join(filter(str.isdigit, x)))
-    )
-    
-    if not page_files:
-        print(f"[ERRO] Nenhuma imagem encontrada na pasta {self.pages_dir}")
-        return False
-    
-    # Extrair nome do mangá e capítulo do nome da pasta
-    chapter_name = os.path.basename(self.output_dir)
-    manga_name = chapter_name.split('_capitulo_')[0].replace('_', ' ').title()
-    chapter_num = chapter_name.split('_capitulo_')[-1]
-    
-    # Caminho relativo para o index.html (um nível acima)
-    index_path = os.path.relpath(os.path.join(self.output_dir, "..", "index.html"), start=self.output_dir)
-    
-    # Gerar o conteúdo HTML
-    html_content = f"""<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{manga_name} - Capítulo {chapter_num}</title>
-    <style>
-        :root {{
-            --bg-color: #1a1a1a;
-            --header-color: #000;
-            --text-color: #e0e0e0;
-            --secondary-text: #aaa;
-            --button-color: #333;
-            --button-hover: #555;
-        }}
-        
-        * {{
-            box-sizing: border-box;
-        }}
-        
-        body {{
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.5;
-        }}
-        
-        .header {{
-            width: 100%;
-            background-color: var(--header-color);
-            padding: 15px 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }}
-        
-        .header-content {{
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 15px;
-            position: relative;
-        }}
-        
-        .title {{
-            margin: 0;
-            font-size: 1.3rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }}
-        
-        .chapter-info {{
-            margin-top: 5px;
-            font-size: 0.9rem;
-            color: var(--secondary-text);
-        }}
-        
-        .back-button {{
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 0.8rem;
-            text-decoration: none;
-        }}
-        
-        .back-button:hover {{
-            background-color: var(--button-hover);
-        }}
-        
-        .page-container {{
-            width: 100%;
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 10px;
-        }}
-        
-        .page {{
-            margin-bottom: 20px;
-        }}
-        
-        .page-number {{
-            color: var(--secondary-text);
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            padding-left: 5px;
-        }}
-        
-        .manga-page {{
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 3px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }}
-        
-        @media (max-width: 600px) {{
-            .title {{
-                font-size: 1.1rem;
-                padding-left: 40px;
-                padding-right: 10px;
-            }}
-            
-            .chapter-info {{
-                padding-left: 40px;
-                padding-right: 10px;
-            }}
-            
-            .back-button {{
-                padding: 4px 8px;
-                font-size: 0.7rem;
-            }}
-            
-            .page-container {{
-                padding: 0 5px;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <a href="{index_path}" class="back-button">← Voltar</a>
-            <h1 class="title">{manga_name}</h1>
-            <div class="chapter-info">Capítulo {chapter_num}</div>
-        </div>
-    </div>
-    
-    <div class="page-container">
-"""
-
-    # Adicionar cada página ao HTML
-    for i, page_file in enumerate(page_files, 1):
-        page_path = os.path.join("pages", page_file)
-        html_content += f"""
-        <div class="page">
-            <div class="page-number">Página {i}</div>
-            <img class="manga-page" src="{page_path}" alt="Página {i}" loading="lazy">
-        </div>
-"""
-
-    # Fechar o HTML
-    html_content += """
-    </div>
-</body>
-</html>
-"""
-    
-    # Escrever o arquivo HTML
-    output_html = os.path.join(self.output_dir, "leitor.html")
-    with open(output_html, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    
-    print(f"[HTML] Gerado com sucesso: {output_html}")
-    return True
-
 def get_next_chapter(driver):
     try:
         next_btn = WebDriverWait(driver, 10).until(
@@ -404,6 +217,180 @@ def get_next_chapter(driver):
     print("[AVISO] Não foi possível encontrar o link para o próximo capítulo")
     return None
 
+def generate_html_reader(self):
+    page_files = sorted(
+        [f for f in os.listdir(self.pages_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))],
+        key=lambda x: int(''.join(filter(str.isdigit, x))))
+    
+    if not page_files:
+        print(f"[ERRO] Nenhuma imagem encontrada na pasta {self.pages_dir}")
+        return False
+    
+    chapter_name = os.path.basename(self.output_dir)
+    manga_name = chapter_name.split('_capitulo_')[0].replace('_', ' ').title()
+    chapter_num = chapter_name.split('_capitulo_')[-1]
+    index_path = os.path.relpath(os.path.join(self.output_dir, "..", "index.html"), start=self.output_dir)
+    
+    html_content = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{manga_name} - Capítulo {chapter_num}</title>
+    <style>
+        :root {{
+            --bg-color: #1a1a1a;
+            --header-bg: #0d0d0d;
+            --text-color: #f0f0f0;
+            --secondary-text: #b3b3b3;
+            --accent-color: #4a6fa5;
+            --page-bg: #262626;
+        }}
+        
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        
+        body {{
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }}
+        
+        .header {{
+            background-color: var(--header-bg);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }}
+        
+        .back-button {{
+            color: var(--secondary-text);
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }}
+        
+        .back-button:hover {{
+            color: var(--accent-color);
+        }}
+        
+        .title-container {{
+            text-align: center;
+            flex-grow: 1;
+        }}
+        
+        .manga-title {{
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }}
+        
+        .chapter-info {{
+            font-size: 13px;
+            color: var(--secondary-text);
+        }}
+        
+        .reader-container {{
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 10px;
+        }}
+        
+        .page-container {{
+            margin-bottom: 30px;
+            background-color: var(--page-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+        }}
+        
+        .page-number {{
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--secondary-text);
+            background-color: var(--header-bg);
+        }}
+        
+        .manga-page {{
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }}
+        
+        @media (max-width: 768px) {{
+            .header {{
+                padding: 10px;
+            }}
+            
+            .manga-title {{
+                font-size: 15px;
+            }}
+            
+            .chapter-info {{
+                font-size: 12px;
+            }}
+            
+            .reader-container {{
+                padding: 15px 5px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="{index_path}" class="back-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span style="margin-left: 6px;">Voltar</span>
+        </a>
+        
+        <div class="title-container">
+            <div class="manga-title">{manga_name}</div>
+            <div class="chapter-info">Capítulo {chapter_num}</div>
+        </div>
+        
+        <div style="width: 58px;"></div> <!-- Espaçamento para alinhamento -->
+    </div>
+    
+    <div class="reader-container">
+"""
+
+    for i, page_file in enumerate(page_files, 1):
+        page_path = os.path.join("pages", page_file)
+        html_content += f"""
+        <div class="page-container">
+            <div class="page-number">Página {i}</div>
+            <img class="manga-page" src="{page_path}" alt="Página {i}" loading="lazy">
+        </div>
+"""
+
+    html_content += """
+    </div>
+</body>
+</html>
+"""
+    
+    output_html = os.path.join(self.output_dir, "leitor.html")
+    with open(output_html, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"[HTML] Gerado com sucesso: {output_html}")
+    return True
+
 def setup_driver():
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
@@ -419,7 +406,7 @@ def main():
     output_dir = user_input if user_input else default_dir
     os.makedirs(output_dir, exist_ok=True)
 
-    num_chapters = 8 # ou input se quiser customizar
+    num_chapters = int(input("Quantidade de capitulos \n")) # ou input se quiser customizar
     driver = setup_driver()
 
     start_url = input("Digite o link do primeiro capítulo: ")

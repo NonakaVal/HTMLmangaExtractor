@@ -10,14 +10,13 @@ def generate_index_html(base_dir):
             if os.path.exists(os.path.join(item_path, "leitor.html")):
                 chapter_name = item.replace("_", " ").replace("capitulo", "Capítulo")
                 
-                # Caminho relativo da capa (sempre page_002.png se existir)
+                # Caminho relativo da capa
                 cover_rel = os.path.join(item, "pages", "page_02.png")
                 cover_abs = os.path.join(base_dir, cover_rel)
 
                 if not os.path.exists(cover_abs):
-                    # Pega segunda imagem disponível
                     pages = sorted([f for f in os.listdir(os.path.join(item_path, "pages")) 
-                                    if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+                                  if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
                     if len(pages) >= 2:
                         cover_rel = os.path.join(item, "pages", pages[1])
                     elif pages:
@@ -45,93 +44,186 @@ def generate_index_html(base_dir):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca de Mangás</title>
     <style>
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+        :root {{
+            --bg-color: #f8f8f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --secondary-text: #666666;
+            --accent-color: #4a6fa5;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }}
+        
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        
+        body {{
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }}
+        
         .header {{
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
         }}
-        .manga-title {{
-            font-size: 2.5em;
-            margin: 0;
-            color: #222;
+        
+        .title {{
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 5px;
         }}
-        .chapters-container {{
+        
+        .subtitle {{
+            font-size: 14px;
+            color: var(--secondary-text);
+        }}
+        
+        .library-container {{
+            max-width: 1200px;
+            margin: 0 auto;
+        }}
+        
+        .chapters-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 10px;
         }}
+        
         .chapter-card {{
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
             color: inherit;
         }}
+        
         .chapter-card:hover {{
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
         }}
+        
+        .cover-container {{
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }}
+        
         .chapter-cover {{
             width: 100%;
-            height: 280px;
+            height: 100%;
             object-fit: cover;
-            border-bottom: 1px solid #eee;
+            transition: transform 0.3s;
         }}
-        .chapter-info {{
-            padding: 15px;
-            text-align: center;
+        
+        .chapter-card:hover .chapter-cover {{
+            transform: scale(1.03);
         }}
-        .chapter-name {{
-            margin: 0;
-            font-weight: 600;
-            font-size: 1.1em;
-        }}
+        
         .no-cover {{
-            height: 280px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #eee;
-            color: #777;
+            height: 100%;
+            color: var(--secondary-text);
+            font-size: 14px;
         }}
-        @media (max-width: 600px) {{
-            .chapters-container {{
-                grid-template-columns: 1fr;
+        
+        .chapter-info {{
+            padding: 14px;
+        }}
+        
+        .chapter-name {{
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }}
+        
+        .chapter-number {{
+            font-size: 13px;
+            color: var(--secondary-text);
+        }}
+        
+        @media (max-width: 768px) {{
+            .chapters-grid {{
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }}
+            
+            .cover-container {{
+                height: 200px;
+            }}
+            
+            .title {{
+                font-size: 24px;
+            }}
+        }}
+        
+        @media (max-width: 480px) {{
+            .chapters-grid {{
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 12px;
+            }}
+            
+            .cover-container {{
+                height: 180px;
+            }}
+            
+            .chapter-info {{
+                padding: 12px;
+            }}
+            
+            .chapter-name {{
+                font-size: 14px;
             }}
         }}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1 class="manga-title">{os.path.basename(base_dir)}</h1>
+        <h1 class="title">{os.path.basename(base_dir)}</h1>
+        <p class="subtitle">{len(chapters)} capítulos disponíveis</p>
     </div>
     
-    <div class="chapters-container">
+    <div class="library-container">
+        <div class="chapters-grid">
 """
 
     for chapter in chapters:
-        cover_html = f'<img src="{chapter["cover"]}" class="chapter-cover" alt="Capa">' if chapter["cover"] else '<div class="no-cover">Sem capa</div>'
+        cover_html = f'<img src="{chapter["cover"]}" class="chapter-cover" alt="Capa">' if chapter["cover"] else '<div class="no-cover">Sem imagem</div>'
+        chapter_num = ''.join(filter(str.isdigit, chapter['path'].split('_capitulo_')[-1]))
+        
         html_content += f"""
-        <a href="{chapter['leitor']}" class="chapter-card">
-            {cover_html}
-            <div class="chapter-info">
-                <h3 class="chapter-name">{chapter['name']}</h3>
-            </div>
-        </a>
+            <a href="{chapter['leitor']}" class="chapter-card">
+                <div class="cover-container">
+                    {cover_html}
+                </div>
+                <div class="chapter-info">
+                    <h3 class="chapter-name">{chapter['name'].split(' Capítulo')[0]}</h3>
+                    <p class="chapter-number">Capítulo {chapter_num}</p>
+                </div>
+            </a>
 """
 
     html_content += """
+        </div>
     </div>
 </body>
 </html>
@@ -142,7 +234,6 @@ def generate_index_html(base_dir):
     
     print(f"Index gerado com sucesso: {index_path}")
     return True
-
 if __name__ == "__main__":
     base_dir = input("Digite o caminho absoluto da pasta que contém os capítulos: ").strip()
     if not os.path.isabs(base_dir):
